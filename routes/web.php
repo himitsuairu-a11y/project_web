@@ -46,6 +46,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
     Route::delete('admin/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+
+    Route::get('admin/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index');
+    Route::post('admin/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update');
 });
 
 Route::middleware(['auth'])->group(function () {
