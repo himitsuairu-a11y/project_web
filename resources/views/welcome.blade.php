@@ -11,6 +11,9 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+        <!-- Alpine.js -->
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
         <!-- Tailwind CSS CDN (Memastikan UI & utility selalu tampil sempurna) -->
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
@@ -63,7 +66,7 @@
             }
         </style>
     </head>
-    <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans antialiased overflow-x-hidden selection:bg-brand-500 selection:text-white">
+    <body x-data class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans antialiased overflow-x-hidden selection:bg-brand-500 selection:text-white">
 
         <!-- ================= NAVBAR ================= -->
         <header class="fixed top-0 left-0 right-0 z-50 nav-glass transition-all duration-300 shadow-sm">
@@ -113,9 +116,21 @@
                     <div class="hidden md:flex items-center gap-3">
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="px-5 py-2.5 text-sm font-bold text-white bg-slate-900 dark:bg-brand-500 dark:hover:bg-brand-600 rounded-full hover:shadow-lg transition-all duration-300">
-                                    Dashboard
-                                </a>
+                                @if(auth()->user()->role === \App\Enums\UserRole::ADMIN || (isset(auth()->user()->role->value) && auth()->user()->role->value === \App\Enums\UserRole::ADMIN->value) || auth()->user()->role === \App\Enums\UserRole::ADMIN->value)
+                                    <a href="{{ route('admin.dashboard') }}" class="px-5 py-2.5 text-sm font-bold text-white bg-slate-900 dark:bg-brand-500 dark:hover:bg-brand-600 rounded-full hover:shadow-lg transition-all duration-300">
+                                        Dashboard Admin
+                                    </a>
+                                @else
+                                    <a href="{{ route('user.dashboard') }}" class="px-5 py-2.5 text-sm font-bold text-white bg-slate-900 dark:bg-brand-500 dark:hover:bg-brand-600 rounded-full hover:shadow-lg transition-all duration-300">
+                                        Dashboard User
+                                    </a>
+                                @endif
+                                <form method="POST" action="{{ route('logout') }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-red-600 transition-colors">
+                                        Logout
+                                    </button>
+                                </form>
                             @else
                                 <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-brand-600 transition-colors">
                                     Masuk
@@ -161,7 +176,15 @@
                     <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-3">
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="w-full text-center py-3 rounded-xl bg-brand-500 text-white font-bold">Dashboard</a>
+                                @if(auth()->user()->role === \App\Enums\UserRole::ADMIN || (isset(auth()->user()->role->value) && auth()->user()->role->value === \App\Enums\UserRole::ADMIN->value) || auth()->user()->role === \App\Enums\UserRole::ADMIN->value)
+                                    <a href="{{ route('admin.dashboard') }}" class="w-full text-center py-3 rounded-xl bg-brand-500 text-white font-bold">Dashboard Admin</a>
+                                @else
+                                    <a href="{{ route('user.dashboard') }}" class="w-full text-center py-3 rounded-xl bg-brand-500 text-white font-bold">Dashboard User</a>
+                                @endif
+                                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                    @csrf
+                                    <button type="submit" class="w-full text-center py-2.5 rounded-xl border border-red-300 text-red-600 font-bold">Logout</button>
+                                </form>
                             @else
                                 <a href="{{ route('login') }}" class="w-full text-center py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-bold">Masuk</a>
                                 @if (Route::has('register'))
@@ -209,7 +232,7 @@
 
                         <!-- Call to Action Buttons -->
                         <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                            <a href="#katalog" class="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-center shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
+                            <a href="{{ url('/catalog') }}" class="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-center shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
                                 <span>Adopsi Sekarang</span>
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                             </a>
@@ -243,8 +266,8 @@
 
                             <!-- Main Hero Image with Floating Animation -->
                             <div class="relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 aspect-[4/5] animate-float">
-                                <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80"
-                                     alt="Anjing Adopsi Lucu"
+                                <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80"
+                                     alt="Kucing Adopsi Lucu"
                                      class="w-full h-full object-cover">
                             </div>
 
@@ -261,7 +284,7 @@
 
                             <!-- Floating Badge 2 (Friendly & Ready) -->
                             <div class="absolute -right-4 bottom-10 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-4 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-100 dark:border-slate-700 animate-bounce" style="animation-duration: 5s; animation-delay: 1.5s;">
-                                <span class="text-3xl">🐶</span>
+                                <span class="text-3xl">🐱</span>
                                 <div>
                                     <p class="text-xs font-bold text-slate-900 dark:text-white">Siap Pulang Hari Ini</p>
                                     <p class="text-[11px] text-emerald-600 font-semibold">Tersedia 24 Sahabat</p>
@@ -293,86 +316,44 @@
                 <!-- Pet Cards Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-                    <!-- Card 1 -->
-                    <div class="bg-slate-50 dark:bg-slate-900 rounded-[2rem] overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
-                        <div class="relative h-64 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=600&q=80"
-                                 alt="Kucing Milo"
-                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                            <span class="absolute top-4 left-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold text-slate-900 dark:text-white">
-                                😺 Kucing
-                            </span>
-                            <span class="absolute top-4 right-4 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
-                                3 Bulan
-                            </span>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Milo</h3>
-                                <span class="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-1 rounded-lg">Jantan</span>
+                    @forelse($featuredCats as $cat)
+                        <div class="bg-slate-50 dark:bg-slate-900 rounded-[2rem] overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
+                            <div class="relative h-64 overflow-hidden">
+                                <img src="{{ Storage::url($cat->photo_path) }}"
+                                     alt="Foto Kucing"
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                <span class="absolute top-4 left-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold text-slate-900 dark:text-white">
+                                    😺 Kucing
+                                </span>
+                                <span class="absolute top-4 right-4 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
+                                    {{ $cat->age_in_months }} Bulan
+                                </span>
                             </div>
-                            <p class="text-sm text-slate-500 mb-6 leading-relaxed">
-                                Sangat manja, senang mendengkur di pangkuan, dan sudah terlatih menggunakan litter box.
-                            </p>
-                            <button class="w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white font-bold group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-orange-500 group-hover:text-white transition-all duration-300">
-                                Ajukan Adopsi Milo
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div class="bg-slate-50 dark:bg-slate-900 rounded-[2rem] overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
-                        <div class="relative h-64 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80"
-                                 alt="Anjing Max"
-                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                            <span class="absolute top-4 left-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold text-slate-900 dark:text-white">
-                                🐶 Anjing
-                            </span>
-                            <span class="absolute top-4 right-4 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
-                                1.5 Tahun
-                            </span>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Max</h3>
-                                <span class="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-1 rounded-lg">Jantan</span>
+                            <div class="p-6">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ $cat->name }}</h3>
+                                    <span class="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-1 rounded-lg">{{ $cat->breed }}</span>
+                                </div>
+                                <p class="text-sm text-slate-500 mb-6 leading-relaxed line-clamp-2">
+                                    {{ $cat->condition }}
+                                </p>
+                                <button type="button" @click="$dispatch('open-detail', {{ json_encode([
+                                    'name' => $cat->name,
+                                    'breed' => $cat->breed,
+                                    'age' => $cat->age_in_months,
+                                    'condition' => $cat->condition,
+                                    'photo' => Storage::url($cat->photo_path),
+                                    'photos' => $cat->photos ? array_map(fn($p) => Storage::url($p), $cat->photos) : []
+                                ]) }})" class="block text-center w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white font-bold group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-orange-500 group-hover:text-white transition-all duration-300">
+                                    Lihat {{ $cat->name }}
+                                </button>
                             </div>
-                            <p class="text-sm text-slate-500 mb-6 leading-relaxed">
-                                Penuh energi, suka bermain lempar tangkap bola, sangat ramah pada anak-anak.
-                            </p>
-                            <button class="w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white font-bold group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-orange-500 group-hover:text-white transition-all duration-300">
-                                Ajukan Adopsi Max
-                            </button>
                         </div>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div class="bg-slate-50 dark:bg-slate-900 rounded-[2rem] overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
-                        <div class="relative h-64 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=600&q=80"
-                                 alt="Kucing Luna"
-                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                            <span class="absolute top-4 left-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold text-slate-900 dark:text-white">
-                                😺 Kucing
-                            </span>
-                            <span class="absolute top-4 right-4 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
-                                8 Bulan
-                            </span>
+                    @empty
+                        <div class="col-span-full py-12 text-center text-slate-500">
+                            Belum ada hewan yang tersedia untuk diadopsi saat ini.
                         </div>
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Luna</h3>
-                                <span class="text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-950/60 px-2.5 py-1 rounded-lg">Betina</span>
-                            </div>
-                            <p class="text-sm text-slate-500 mb-6 leading-relaxed">
-                                Pendiam, tenang, menyukai tempat hangat di dekat jendela untuk bersantai di sore hari.
-                            </p>
-                            <button class="w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white font-bold group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-orange-500 group-hover:text-white transition-all duration-300">
-                                Ajukan Adopsi Luna
-                            </button>
-                        </div>
-                    </div>
+                    @endforelse
 
                 </div>
             </div>
@@ -450,7 +431,7 @@
 
                     <div class="lg:col-span-6 relative">
                         <div class="relative rounded-3xl overflow-hidden shadow-xl aspect-video lg:aspect-square">
-                            <img src="https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80"
+                            <img src="https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=800&q=80"
                                  alt="Shelter Care"
                                  class="w-full h-full object-cover">
                         </div>
@@ -546,5 +527,58 @@
                 });
             });
         </script>
+    <!-- Detail Modal -->
+    <div x-data="{ 
+        open: false, 
+        cat: { name: '', breed: '', age: '', condition: '', photo: '', photos: [] },
+        activePhoto: ''
+    }" 
+    @open-detail.window="
+        cat = $event.detail; 
+        activePhoto = cat.photo;
+        open = true;
+    "
+    x-show="open" 
+    class="fixed inset-0 z-[110] flex items-center justify-center" style="display: none;">
+        <!-- Backdrop -->
+        <div x-show="open" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open = false"></div>
+        
+        <!-- Modal Content -->
+        <div x-show="open" x-transition class="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden max-w-lg w-full mx-4 relative z-10 shadow-2xl flex flex-col">
+            <button @click="open = false" class="absolute top-4 right-4 p-2 text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-900/50 backdrop-blur rounded-full hover:bg-white dark:hover:bg-slate-800 transition-colors z-20">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            
+            <div class="h-64 w-full bg-slate-100 dark:bg-slate-800 relative group">
+                <img :src="activePhoto" class="w-full h-full object-cover">
+            </div>
+            
+            <!-- Thumbnail gallery -->
+            <div class="px-8 pt-6 pb-2" x-show="cat.photos && cat.photos.length > 0">
+                <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                    <template x-for="p in cat.photos" :key="p">
+                        <button type="button" @click="activePhoto = p" class="w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2" :class="activePhoto === p ? 'border-brand-500' : 'border-transparent opacity-60 hover:opacity-100'">
+                            <img :src="p" class="w-full h-full object-cover">
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <div class="p-8 pt-4">
+                <h3 x-text="cat.name" class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1"></h3>
+                <div class="flex gap-2 mb-6">
+                    <span x-text="cat.breed" class="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg"></span>
+                    <span x-text="cat.age + ' Bulan'" class="text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg"></span>
+                </div>
+                
+                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-400 mb-2 uppercase tracking-wider">Kondisi & Kepribadian</h4>
+                <p x-text="cat.condition" class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-8"></p>
+                
+                <a href="{{ url('/catalog') }}" class="block text-center w-full py-3.5 rounded-xl bg-brand-500 text-white font-bold hover:bg-brand-600 transition-all">
+                    Lihat Semua di Katalog
+                </a>
+            </div>
+        </div>
+    </div>
     </body>
 </html>

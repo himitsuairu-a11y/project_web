@@ -28,15 +28,21 @@ class AuthController extends Controller
             $request->session()->regenerate();
             
             // Pengecekan Middleware/Role
-            if (Auth::user()->role === 'admin') {
-                return redirect()->intended('admin/dashboard');
+            $role = Auth::user()->role;
+            if ($role === \App\Enums\UserRole::ADMIN || (isset($role->value) && $role->value === \App\Enums\UserRole::ADMIN->value) || $role === \App\Enums\UserRole::ADMIN->value) {
+                return redirect()->intended('/admin/dashboard');
             }
-            return redirect()->intended('user/katalog');
+            return redirect()->intended('/dashboard');
         }
 
         return back()->withErrors([
             'email' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');
+    }
+
+    public function showRegister()
+    {
+        return view('auth.register');
     }
 
     // Proses Create User (Sign Up)
@@ -52,11 +58,11 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'user', 
+            'role' => \App\Enums\UserRole::ADOPTER->value, 
         ]);
 
         Auth::login($user);
-        return redirect('user/katalog');
+        return redirect('/dashboard');
     }
 
     public function logout(Request $request)
